@@ -1,0 +1,112 @@
+#Data Summarization
+library(readr)
+streamflow <- read_csv("streamflow.csv")
+View(streamflow)
+df1 <- streamflow[-2]
+df1
+df2<- streamflow[2]
+df2
+streamflow_new <- cbind(df2, df1)
+streamflow_new
+View(streamflow_new)
+colnames(streamflow_new) <- c("Y","X1","X2","X3","X4","X5","X6","X7","X8")
+str(streamflow_new)
+summary(streamflow_new)
+## HISTOGRAMS
+# Load the necessary libraries
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+# Gather the data to long format for easy use with ggplot
+streamflow_long <- streamflow_new %>%
+ gather(key = "Variable", value = "Value", -Y, -X1, -X2, -X3, -X4, -X5, -X6, -X7, -X8)
+# Gather the data to long format for easy use with ggplot
+streamflow_long <- streamflow_new %>%
+ gather(key = "Variable", value = "Value", Y:X8)
+# Use ggplot2 to create histograms
+ggplot(streamflow_long, aes(x = Value)) +
+ geom_histogram(bins = 30, fill = "blue", color = "black") +
+ facet_wrap(~ Variable, scales = "free") +
+ theme_minimal() +
+ labs(x = NULL, y = "Frequency") +
+ theme(strip.text = element_text(size = 8))
+## BOX PLOTS
+# Load the necessary libraries
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+# Assuming streamflow is your dataframe and it has the correct structure
+P a g e | 28
+# Create individual box plots for each variable
+p1 <- ggplot(streamflow_new, aes(y = Y)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of Max90", x = "Max90", y = "Value")
+p2 <- ggplot(streamflow_new, aes(y = X1)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of STAID", x = "STAID", y = "Value")
+p3 <- ggplot(streamflow_new, aes(y = X2)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of The Drainage Area", x = "DRAIN_SQKM", y = "Value")
+p4 <- ggplot(streamflow_new, aes(y = X3)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of The average basin precipitation", x = "PPTAVG_BASIN", y = "Value")
+p5 <- ggplot(streamflow_new, aes(y = X4)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of The average basin temperature", x = "T_AVG_BASIN", y = "Value")
+p6 <- ggplot(streamflow_new, aes(y = X5)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of The average temperature at the stream location", x = "T_AVG_SITE", y =
+"Value")
+p7 <- ggplot(streamflow_new, aes(y = X6)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of The average relative humidity across the basin", x = "(RH_BASIN", y = "Value")
+p8 <- ggplot(streamflow_new, aes(y = X7)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of The average March precipitation", x = "MAR_PPT7100_CM", y = "Value")
+p9 <- ggplot(streamflow_new, aes(y = X8)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ labs(title = "Boxplot of The median relief ratio", x = "RRMEDIAN", y = "Value")
+# Combine plots into a list (you can print them separately or arrange them on a grid)
+plots_list <- list(p1, p2, p3, p4, p5, p6, p7, p8, p9) # Add the rest of your plots to this list
+# Create a combined plot with all box plots
+streamflow_long <- gather(streamflow_new, key = "Variable", value = "Value", -Y, -X1, -X2, -X3, -X4, -
+X5, -X6, -X7, -X8)
+# Correctly gather all columns including Y for the long format data frame
+streamflow_long <- streamflow_new %>%
+P a g e | 29
+ pivot_longer(cols = c(Y, X1, X2, X3, X4, X5, X6, X7, X8), names_to = "Variable", values_to = "Value")
+# Now create the combined box plot
+combined_boxplot <- ggplot(streamflow_long, aes(x = Variable, y = Value)) +
+ geom_boxplot(fill = "blue", color = "black") +
+ facet_wrap(~ Variable, scales = "free") +
+ theme_minimal() +
+ labs(x = "", y = "Value") +
+ theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotate x labels for readability
+# Print the combined box plot
+print(combined_boxplot)
+## SCATTER PLOTS
+library(ggplot2)
+library(gridExtra)
+# Assuming 'Y' is the variable you want to compare against and is in the first column
+y_variable <- names(streamflow_new)[1]
+y_variable
+variables <- names(streamflow_new)[]
+variables# Exclude 'Y'
+# Generating a scatter plot for each variable against Y
+scatter_plots <- lapply(variables, function(var) {
+ ggplot(streamflow_new, aes_string(x = y_variable, y = var)) +
+ geom_point() +
+ labs(title = paste("Scatter Plot of", var, "vs", y_variable), x = y_variable, y = var) +
+ theme_minimal()
+})
+# Combine all scatter plots into one plot
+combined_scatter_plot <- do.call(grid.arrange, c(scatter_plots, ncol = 3))
+## CORRELATION MATRIX
+# Assuming 'streamflow' is your dataframe with all relevant variables
+correlation_matrix <- cor(streamflow_new, use = "complete.obs", method = "pearson")
+print(correlation_matrix)
+# Load necessary libraries for creating heatmaps
+library(ggplot2)
+library(reshape2) # For melting the data
+# Melting the correlation matrix for use in ggplot2
+melted_correlation_matrix <- melt(correlation_matrix)
